@@ -11,7 +11,7 @@ statue01 = [
 statue_a01 = [statue01];
 
 p_statue = [[0,0,0,1],[64,75,109,1],[56,56,91,1],[90,105,136,1],[0,0,0,0]];
-statue = new GameObject( [statue_a01], p_statue, 190, 200, 17, 9, false, 5);
+statue = new GameObject( [statue_a01], p_statue, 290, 350, 32, 5, true, 5);
 statue.type = "estatua";
 
 statue.update= function(){
@@ -21,7 +21,6 @@ statue.update= function(){
 		this.currentframe = 0;
 	}
 }
-
 
 
 statue02 = [ 
@@ -79,7 +78,7 @@ statue02 = [
 statue_a02 = [statue02];
 
 p_statue2 = [[0,0,0,1],[64,75,109,1],[90,105,136,1],[56,56,91,1], [38,43,68,1], [0,0,0,0]];
-statue2 = new GameObject( [statue_a02], p_statue2, 203, 50, 17, 9, false, 100);
+statue2 = new GameObject( [statue_a02], p_statue2, 303, 200, 17, 9, false, 100);
 statue2.type = "estatua";
 
 statue2.update= function(){

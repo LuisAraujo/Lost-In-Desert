@@ -1,11 +1,13 @@
 /*** LEVEL 02 ***/
 gameElements.push([]); 
+lv = 1;
+insertElement(wizard,lv)
+//insertElement(fragc,1)
+//insertElement(frag,1)
+insertElement(statue,lv)
+insertElement(statue2,lv)
 
-insertElement(wizard,1)
-insertElement(fragc,1)
-insertElement(frag,1)
-insertElement(statue,1)
-insertElement(statue2,1)
-//gameElements[1].push();
-
-
+makeMapUp2(lv);
+makeMapLeft2(lv);
+makeMapRight2(lv);
+makeMapDown(lv);

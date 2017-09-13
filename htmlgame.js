@@ -121,10 +121,6 @@ function loop(){
 	if(currentLevel!=0)
 		currenttime+=0.00001;
 	
-	//console.log(currenttime);
-	
-	//ctx.clearRect(0, 0, canvas.width, canvas.height);
-
 	function compare(a,b) {
 		if (a.z < b.z)
 			return -1;
@@ -137,19 +133,13 @@ function loop(){
 	gameElements[currentLevel].sort(compare);
 	len = localChanged.length;
 	
-	//for(var o =0; o <len; o++){
-		for(var i=0; i< gameElements[currentLevel].length; i++){
-			el = gameElements[currentLevel][i];
-			//console.log(el.changed, el.id)
-			if(el.changed != null){
-				   // ctx.clearRect(el.old, el.y, el.w*sizepixel, el.h*sizepixel);
-					el.clear(el.changed);
-					el.print();
-					
-					//el.changed = null;	
-			}
-		
-		
+	for(var i=0; i< gameElements[currentLevel].length; i++){
+		el = gameElements[currentLevel][i];
+		if((el.changed != null) && (el.type!="wall")){
+				el.clear(el.changed);
+				el.print();
+				el.changed = null;
+		}
 	}
 	
 	for(var i=0; i< gameElements[currentLevel].length; i++)
@@ -218,13 +208,13 @@ GameObject.prototype.print = function(){
 			r-=360			
 			
 		if( r == 90){
-			ctx.translate(500,0);
+			ctx.translate(canvas.width,0);
 			ctx.rotate(90*Math.PI/180);
 		}else if( r == 180){
-			ctx.translate(500,500);
+			ctx.translate(canvas.width,canvas.height);
 			ctx.rotate(180*Math.PI/180);
 		}else if(r == 270){
-			ctx.translate(0,500);
+			ctx.translate(0,canvas.height);
 			ctx.rotate(270*Math.PI/180);
 		}
 	}
@@ -253,7 +243,7 @@ GameObject.prototype.print = function(){
 	}
 	
 	//this is rect colides [use only for test]
-	if(false && this.collider){
+	if( this.collider){
 		ctx.strokeStyle = "rgb(0,255,0)";
 		ctx.lineWidth = 1;
 		ctx.strokeRect(this.x,this.y, this.w*sizepixel, this.h*sizepixel);
@@ -303,8 +293,7 @@ GameObject.prototype.clear = function(change){
 		  if(color[3]==0){
 			  continue;
 		  }
-		  //ctx.clearRect(el.old, el.y, el.w*sizepixel, el.h*sizepixel);
-		  
+		 
 		  if(oldflipv)
 			ctx.clearRect( x+( (this.data[anim][frame][i].length-j)*sizepixel),  y+(i*sizepixel), sizepixel, sizepixel);
 		  else
@@ -345,15 +334,35 @@ Character.prototype.move = function (dir){
 	oldframe = this.currentframe;
 	oldanim = this.currentanim;
 	
-	if(this.x > canvas.width)
+	if(this.x > 515)
 		loadLevel("left");
 	else if( this.x+ (this.w*sizepixel) < 0)
 		loadLevel("right");
-	else if(this.y > canvas.height)
+	else if(this.y > 515)
 		loadLevel("down");
-	else if(this.y+(this.h*sizepixel) < 0)
+	else if(this.y < 40)
 		loadLevel("up");
 	
+	if((dir == "up") || (dir == "upleft") || (dir == "upright")){
+	    if((this.y < 100) && ( (this.x < 260) || (this.x > 290) ) )
+			return;
+	}
+	
+	if((dir == "left") || (dir == "upleft") || (dir == "downleft")){
+	    if((this.x < 90) || (this.y > 468))
+			return;	
+	}
+	
+	if((dir == "right") || (dir == "upright") || (dir == "downright")){
+	    if( ( (this.x > canvas.width-150) && ( (this.y < 275) || (this.y > 295) ) ) || (this.y < 90) || (this.y > 468))
+			return;
+	}
+	
+	if((dir == "down") || (dir == "downleft") || (dir == "downright")){
+	    if((this.y > canvas.height-160) && ( (this.x < 260) || (this.x > 327) )){
+			return;
+		}
+	}
 	
     if(dir =="left"){
 		this.x-=3;
@@ -384,7 +393,7 @@ Character.prototype.move = function (dir){
 		this.flipv = false;
 	}
 	
-	if(dir=="up"){
+	if((dir=="up")){
 		this.y-=3;
 	}else if(dir=="down"){
 		this.y+=3;
@@ -401,6 +410,74 @@ Character.prototype.move = function (dir){
 	}
 
 }
+
+Character.prototype.update = function(){
+	//collider
+	colup = false;
+	coldown = false;
+	colleft = false;
+	colright = false;
+	inner = false;
+	
+	elens = gameElements[currentLevel];
+	for(var i=0; i< elens .length; i++){
+		inner = false;
+		if(this != elens[i]) {
+			if( ((this.x > elens[i].x) && (this.x < elens[i].x+elens[i].w*sizepixel) &&
+			(this.y > elens[i].y) && (this.y < elens[i].y+elens[i].h*sizepixel)) ||
+			((elens[i].x > this.x) && (elens[i].x < this.x+this.w*sizepixel) &&
+			(elens[i].y > this.y) && (elens[i].y < this.y+elens[i].h*sizepixel))){
+				elens[i].changed=null;
+			}else if(elens[i].changed==null){
+				elens[i].changed=[elens[i].currentanim,elens[i].currentframe,elens[i].x,elens[i].y];
+			}
+		//end if
+		}
+	//end for
+	}
+	  
+	if(left && !colleft){
+	    if(up && !colup){
+			this.move("upleft");
+		}else if(down && !colup){
+			this.move("downleft");
+		}else{
+			this.move("left");
+		}
+		//this.currentanim = 1;
+	}else if(right && !colright){
+	    if(up && !colup){
+			this.move("upright");
+	 
+		}else if(down && !colup){
+			this.move("downright");
+		 
+		}else{ 
+			this.move("right");
+		}
+	}else if(down && !coldown){
+		this.move("down");
+		 
+		//this.currentanim = 0;
+	}else if(up && !colup){
+		this.move("up");
+		 
+	}
+   
+    if(up){
+		this.currentanim = 1;
+	}else if(down){
+		this.currentanim = 0; 
+	}
+	if( (!this.isstop) && (!left) && (!right) && (!up) && (!down) ){
+		this.changed = [this.currentanim, this.currentframe, this.x, this.y, this.flipv];
+		this.currentframe = 0;
+		this.isstop = true;
+	}
+
+	
+	//this.print();
+};
 //***CHARACTER FOOTPRINTER Method***//
 Character.prototype.footprinter = function(){
 	if(currenttime - this.lastfootprint < 0.0001)
@@ -411,9 +488,12 @@ Character.prototype.footprinter = function(){
     //pegada.r = currentdir;
 	pegada.x = this.x + 25;
 	pegada.y = this.y + 50;
+	pegada.z = 1;
 	pegada.type = "pegada";
-	pegada.isnew = false; //true;
-	pegada.r = -currentdir[currentLevel]
+	pegada.changed = [0,0,pegada.x,pegada.y];
+	
+	//pegada.isnew = false; //true;
+	pegada.r = -currentdir[currentLevel];
 	pegada.update = function(){
 		//console.log(currenttime - this.timec);
 		if(currenttime - this.timec > 0.1) {
@@ -424,10 +504,7 @@ Character.prototype.footprinter = function(){
 					break;
 				}
 			}
-		
 		}
-		
-		//this.print();
 	}
 	this.lastfootprint = currenttime;
 	insertElement(pegada,currentLevel); 
@@ -436,6 +513,7 @@ Character.prototype.footprinter = function(){
 function insertElement(elem,index){
 	elem.id = gameElements[index].length;	
 	gameElements[index].push(elem);
+	return elem;
 } 
 
 function loadLevel(direction){
@@ -467,6 +545,8 @@ function loadLevel(direction){
 		loadLevelId(cl);
 	}
 	
+	
+	
 }
 
 function loadLevelId(level){
@@ -485,15 +565,16 @@ function loadLevelId(level){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
 	if((id!=0) && (currentLevel != 0)){
-		currentdir[id] += degrees[1];
+		currentdir[id] += degrees[0];
 		if(currentdir[id] >= 360)
 			currentdir[id] -= 360;
 		//console.log("change "+currentLevel)//Math.floor((Math.random() * 4))];
 		
 		for(var i=0; i < gameElements[id].length; i++){
 			if(gameElements[id][i].type == "character"){
-				console.log(currentdir[id]/90);
+				console.log(level[1]);
 				if(level[1] == "up"){
+					
 					//l
 					if(currentdir[id] == 90){
 						gameElements[id][i].x = canvas.width  - wizard.w*sizepixel
@@ -508,14 +589,15 @@ function loadLevelId(level){
 						gameElements[id][i].y = canvas.height/2  - wizard.h*sizepixel;
 					}else{	
 						//u
-						gameElements[id][i].x = canvas.width/2  - wizard.w*sizepixel;
-						gameElements[id][i].y = 0;
+						gameElements[id][i].x = 267;
+						gameElements[id][i].y = 58;
 					}
 					
 				}else if(level[1] == "down"){
+					
 					if(currentdir[id] == 90){
 						//r
-						gameElements[id][i].x = 0;
+						gameElements[id][i].x = 300;
 						gameElements[id][i].y = canvas.height/2  - wizard.h*sizepixel;
 					}else if(currentdir[id] == 180){
 						//u
@@ -527,8 +609,8 @@ function loadLevelId(level){
 						gameElements[id][i].y = canvas.height/2  - wizard.h*sizepixel;
 					}else{
 						//d
-						gameElements[id][i].x = canvas.width/2  - wizard.w*sizepixel;
-						gameElements[id][i].y = canvas.height  - wizard.h*sizepixel;
+						gameElements[id][i].x = 267;
+						gameElements[id][i].y = 495;
 					}
 				}else if(level[1] == "left"){
 					//d
@@ -591,6 +673,9 @@ function loadLevelId(level){
 	});*/
 	
 	currentLevel = id;
+	
+	for(var i=0; i<gameElements[currentLevel].length; i++)
+		gameElements[currentLevel][i].print();
 }
 
 
