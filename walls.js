@@ -40,7 +40,7 @@ if(type==2)
 
 wall = new GameObject( [wall_a01], p_wall, x,y, 20, 28, false, 5);
 wall.type = "wall";
-wall.changed = [0, 0, wall.x, wall.y, wall.flipv];
+wall.changed.push([0, 0, wall.x, wall.y, wall.flipv]);
 wall.r = degrees;
 return wall;
 }
@@ -93,7 +93,7 @@ door = new GameObject( [door_a01], p_door, x,y, 22, 15, false, 5);
 door.flipv = flip;
 door.type = "wall";
 door.r = degrees;
-door.changed = [0, 0,door.x, door.y, door.flipv];
+door.changed.push([0, 0,door.x, door.y, door.flipv]);
 return door;
 }
 
@@ -142,7 +142,7 @@ door2.flipv = flip;
 door2.r = degrees;
 door2.type = "wall";
 
-door2.changed = [0, 0, door2.x, door2.y, door2.flipv];
+door2.changed.push([0, 0, door2.x, door2.y, door2.flipv]);
 
 return door2;
 }
@@ -195,7 +195,7 @@ wall = new GameObject( [wall_a01], p_wall, x,y, 20, 15, false, 5);
 wall.flipv = flip;
 wall.type = "wall";
 wall.r = degrees;
-wall.changed = [0, 0, wall.x, wall.y, wall.flipv];
+wall.changed.push([0, 0, wall.x, wall.y, wall.flipv]);
 
 return wall;	
 }

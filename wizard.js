@@ -311,6 +311,6 @@ palletcha = [[1,2,23,1],[138,1,2,1],[168,0,0,1],[208,0,0,1],[221,17,0,1],[0,0,0,
 [225,225,225,1],[159,169,159,1],[75,126,37,1],[56,100,24,1],[253,234,1,1],[0,0,0,0]];
 
 //wizard = new Character( [ anim01, anim02 ] , [ncolor, skin, orange, brown, brown1], 0,0,6,11);
-wizard = new Character( [anim01, anim02] ,palletcha, 100, 200, 18, 18,false, 90);
+wizard = new Character( [anim01, anim02] ,palletcha, 100, 200, 18, 18,false, 99);
 
 	

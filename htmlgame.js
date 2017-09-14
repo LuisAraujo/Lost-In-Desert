@@ -28,7 +28,7 @@ space = false;
 sizepixel = 3;
 lastlevel = 1;
 collidermode = true;
-currentLevel = 0;
+currentLevel = -1;
 levelElements = new Array();
 
 //game objetcts array
@@ -135,10 +135,10 @@ function loop(){
 	
 	for(var i=0; i< gameElements[currentLevel].length; i++){
 		el = gameElements[currentLevel][i];
-		if((el.changed != null) && (el.type!="wall")){
-				el.clear(el.changed);
+		if((el.changed.length != 0) && (el.type!="wall")){
+				el.clear();
 				el.print();
-				el.changed = null;
+				//el.changed = null;
 		}
 	}
 	
@@ -160,355 +160,6 @@ var herda = function(mae, filha){
     filha.prototype.constructor = filha;
 }
 
-//***GAMEOBJECT Class***//
-//d is array of animation (animation is array of frames) (frames is array of nambrer color)
-//p is paller color
-//x and y is position
-//w and h is width and height
-//c is flag for collider
-//z is z position
-function GameObject(d,p,x,y,w,h,c,z){
-	this.data = d;
-	this.pallet = p;
-	this.x = x;
-	this.y = y;  
-	this.w = w;
-	this.h = h;
-	this.z = z;
-	this.timec = currenttime;
-	//current frame
-	this.currentframe = 0;
-	//currrent animation
-	this.currentanim = 0;
-	//this.rotate = 0;
-	this.collider = c; 
-	//type gameobject
-	this.type = "gameobject";
-	//flag for filp vertical
-	this.flipv = false;
-	//angle rotate
-	this.r = 0;
-	//flag for repaint
-	this.changed = null;
-	//id gameobjetc
-	this.id =-1;
-}
-//***GAMEOBJECT PRINT Method***//
-GameObject.prototype.print = function(){
-	//save context
-	ctx.save();
-	//is not character?
-	if(this.type!="character"){
-		//this code rotate the gameobject in any level
-		
-		r = this.r + currentdir[currentLevel];
-		if(r<0)
-			r+=360
-		else if(r>360)
-			r-=360			
-			
-		if( r == 90){
-			ctx.translate(canvas.width,0);
-			ctx.rotate(90*Math.PI/180);
-		}else if( r == 180){
-			ctx.translate(canvas.width,canvas.height);
-			ctx.rotate(180*Math.PI/180);
-		}else if(r == 270){
-			ctx.translate(0,canvas.height);
-			ctx.rotate(270*Math.PI/180);
-		}
-	}
-	
-
-	//turn game objetcts for print
-	for(var i=0; i< this.data[this.currentanim][parseInt(this.currentframe)].length; i++) {
-		//turn any rect for print
-		for(var j=0; j<this.data[this.currentanim][parseInt(this.currentframe)][i].length; j++) {
-		  //fram not is float	
-		  frame = parseInt(this.currentframe);	
-		  //get color
-		  var color = this.pallet[this.data[this.currentanim][frame][i][j]];
-		  //opacity is 0?
-		  if(color[3]==0){
-			  continue;
-		  }
-		  //else set color in fillstyle
-		  ctx.fillStyle="rgba("+color+")";
-		  //is fliped?
-		  if(this.flipv)
-			ctx.fillRect(this.x+( (this.data[this.currentanim][parseInt(this.currentframe)][i].length-j)*sizepixel),this.y+(i*sizepixel), sizepixel, sizepixel);
-		  else
-			ctx.fillRect(this.x+(j*sizepixel),this.y+(i*sizepixel), sizepixel, sizepixel);
-		}
-	}
-	
-	//this is rect colides [use only for test]
-	if( this.collider){
-		ctx.strokeStyle = "rgb(0,255,0)";
-		ctx.lineWidth = 1;
-		ctx.strokeRect(this.x,this.y, this.w*sizepixel, this.h*sizepixel);
-	}
-	
-	//restore context
-	ctx.restore();
-};
-
-//***GAMEOBJECT CLEAR Method***//
-//change is the state animation and frame for repaint
-GameObject.prototype.clear = function(change){
-   //save context
-   ctx.save();
-   //is not character?
-   if(this.type!="character"){
-		r = this.r + currentdir[currentLevel];
-		if(r<0)
-			r+=360
-		else if(r>360)
-			r-=360	
-		
-		if( r == 90){
-			ctx.translate(500,0);
-			ctx.rotate(90*Math.PI/180);
-		}else if( r == 180){
-			ctx.translate(500,500);
-			ctx.rotate(180*Math.PI/180);
-		}else if(r == 270){
-			ctx.translate(0,500);
-			ctx.rotate(270*Math.PI/180);
-		}
-	}
-	
-	
-	var anim =  change[0];
-	var frame = parseInt(change[1]);
-	var x = change[2];
-	var y = change[3];
-	var oldflipv = change[4];
-	
-	for(var i=0; i< this.data[anim][frame].length; i++) {
-		for(var j=0; j<this.data[anim][frame][i].length; j++) {
-		  //frame = parseInt(this.currentframe);	
-		  var color = this.pallet[this.data[anim][frame][i][j]];
-		  
-		  if(color[3]==0){
-			  continue;
-		  }
-		 
-		  if(oldflipv)
-			ctx.clearRect( x+( (this.data[anim][frame][i].length-j)*sizepixel),  y+(i*sizepixel), sizepixel, sizepixel);
-		  else
-			 ctx.clearRect( x+(j*sizepixel), y+(i*sizepixel), sizepixel, sizepixel);
-		 
-		 
-		}
-	}
-	
-	ctx.restore();
-}
-
-GameObject.prototype.update = function(){};
-
-
-//***CHARACTER Class***//
-//footprint is array for footprint gameobjects
-//lastfootprint is the time of creatation the last footprint
-var Character = function(d, p, x,y, w,h,c,z){
-	GameObject.call(this,d,p,x,y,w,h,c,z);
-	this.type = "character";
-	this.footprint = null;
-	this.lastfootprint = 0;
-}
-
-//This functions is for create enranche 
-herda(GameObject, Character);
-
-//***CHARACTER MOVE Method***//
-//dir is the direction of movement
-Character.prototype.move = function (dir){
-	this.footprinter();
-
-	//pass level
-	oldy = this.y;
-	oldx = this.x;
-	oldflipv = this.flipv;
-	oldframe = this.currentframe;
-	oldanim = this.currentanim;
-	
-	if(this.x > 515)
-		loadLevel("left");
-	else if( this.x+ (this.w*sizepixel) < 0)
-		loadLevel("right");
-	else if(this.y > 515)
-		loadLevel("down");
-	else if(this.y < 40)
-		loadLevel("up");
-	
-	if((dir == "up") || (dir == "upleft") || (dir == "upright")){
-	    if((this.y < 100) && ( (this.x < 260) || (this.x > 290) ) )
-			return;
-	}
-	
-	if((dir == "left") || (dir == "upleft") || (dir == "downleft")){
-	    if((this.x < 90) || (this.y > 468))
-			return;	
-	}
-	
-	if((dir == "right") || (dir == "upright") || (dir == "downright")){
-	    if( ( (this.x > canvas.width-150) && ( (this.y < 275) || (this.y > 295) ) ) || (this.y < 90) || (this.y > 468))
-			return;
-	}
-	
-	if((dir == "down") || (dir == "downleft") || (dir == "downright")){
-	    if((this.y > canvas.height-160) && ( (this.x < 260) || (this.x > 327) )){
-			return;
-		}
-	}
-	
-    if(dir =="left"){
-		this.x-=3;
-		this.flipv = true;
-	}
-	else if(dir =="upleft"){
-		this.x-=2;
-		this.y-=2;
-		this.flipv = true;
-	}
-	else if(dir =="downleft"){
-		this.x-=2;
-		this.y+=2;
-		this.flipv = true;
-	}
-	
-	if(dir=="right"){
-		this.x+=3;
-		this.flipv = false;
-	
-	}else if(dir=="upright"){
-		this.x+=2;
-		this.y-=2;
-		this.flipv = false;
-	}else if(dir=="downright"){
-		this.x+=2;
-		this.y+=2;
-		this.flipv = false;
-	}
-	
-	if((dir=="up")){
-		this.y-=3;
-	}else if(dir=="down"){
-		this.y+=3;
-	}
-	
-	if( (left) || (right) || (up) || (down) ){
-		this.changed = [oldanim, oldframe, oldx, oldy, oldflipv];
-		this.isstop=true;
-		this.currentframe += 0.2;
-	}
-		
-	if(this.currentframe > this.data[this.currentanim].length-1){
-	   this.currentframe = 0;
-	}
-
-}
-
-Character.prototype.update = function(){
-	//collider
-	colup = false;
-	coldown = false;
-	colleft = false;
-	colright = false;
-	inner = false;
-	
-	elens = gameElements[currentLevel];
-	for(var i=0; i< elens .length; i++){
-		inner = false;
-		if(this != elens[i]) {
-			if( ((this.x > elens[i].x) && (this.x < elens[i].x+elens[i].w*sizepixel) &&
-			(this.y > elens[i].y) && (this.y < elens[i].y+elens[i].h*sizepixel)) ||
-			((elens[i].x > this.x) && (elens[i].x < this.x+this.w*sizepixel) &&
-			(elens[i].y > this.y) && (elens[i].y < this.y+elens[i].h*sizepixel))){
-				elens[i].changed=null;
-			}else if(elens[i].changed==null){
-				elens[i].changed=[elens[i].currentanim,elens[i].currentframe,elens[i].x,elens[i].y];
-			}
-		//end if
-		}
-	//end for
-	}
-	  
-	if(left && !colleft){
-	    if(up && !colup){
-			this.move("upleft");
-		}else if(down && !colup){
-			this.move("downleft");
-		}else{
-			this.move("left");
-		}
-		//this.currentanim = 1;
-	}else if(right && !colright){
-	    if(up && !colup){
-			this.move("upright");
-	 
-		}else if(down && !colup){
-			this.move("downright");
-		 
-		}else{ 
-			this.move("right");
-		}
-	}else if(down && !coldown){
-		this.move("down");
-		 
-		//this.currentanim = 0;
-	}else if(up && !colup){
-		this.move("up");
-		 
-	}
-   
-    if(up){
-		this.currentanim = 1;
-	}else if(down){
-		this.currentanim = 0; 
-	}
-	if( (!this.isstop) && (!left) && (!right) && (!up) && (!down) ){
-		this.changed = [this.currentanim, this.currentframe, this.x, this.y, this.flipv];
-		this.currentframe = 0;
-		this.isstop = true;
-	}
-
-	
-	//this.print();
-};
-//***CHARACTER FOOTPRINTER Method***//
-Character.prototype.footprinter = function(){
-	if(currenttime - this.lastfootprint < 0.0001)
-		return;
-	var f = [ [0,1,1,0],[1,0,0,1],[1,0,2,1],[0,1,1,0]]
-	var a = [f];
-	var pegada = new GameObject([a], [[0,0,0,0], [241,153,66,1],[251,131,57,1] ], 10, 10, 5, 5, false, 0);
-    //pegada.r = currentdir;
-	pegada.x = this.x + 25;
-	pegada.y = this.y + 50;
-	pegada.z = 1;
-	pegada.type = "pegada";
-	pegada.changed = [0,0,pegada.x,pegada.y];
-	
-	//pegada.isnew = false; //true;
-	pegada.r = -currentdir[currentLevel];
-	pegada.update = function(){
-		//console.log(currenttime - this.timec);
-		if(currenttime - this.timec > 0.1) {
-			//console.log("removing");
-			for(var i=0; i< gameElements[currentLevel].length; i++){
-				if(gameElements[currentLevel][i].id == this.id){
-					gameElements[currentLevel].splice(i,1)
-					break;
-				}
-			}
-		}
-	}
-	this.lastfootprint = currenttime;
-	insertElement(pegada,currentLevel); 
-}
 
 function insertElement(elem,index){
 	elem.id = gameElements[index].length;	
@@ -564,18 +215,30 @@ function loadLevelId(level){
 	
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
+	/*var currentanim = null;
+	var currentframe =  null;
+	var x =  null;
+	var y = null;
+	var flip = null;*/
+				
 	if((id!=0) && (currentLevel != 0)){
 		currentdir[id] += degrees[0];
 		if(currentdir[id] >= 360)
 			currentdir[id] -= 360;
 		//console.log("change "+currentLevel)//Math.floor((Math.random() * 4))];
 		
+		//pode mudar pela ref global
 		for(var i=0; i < gameElements[id].length; i++){
 			if(gameElements[id][i].type == "character"){
+				/*currentanim = gameElements[id][i].currentanim;
+				currentframe = gameElements[id][i].currentframe;
+				x = gameElements[id][i].x;
+				y = gameElements[id][i].y;
+				flip = gameElements[id][i].flipv;
 				console.log(level[1]);
+				gelms = gameElements[id][i];*/
+				
 				if(level[1] == "up"){
-					
-					//l
 					if(currentdir[id] == 90){
 						gameElements[id][i].x = canvas.width  - wizard.w*sizepixel
 						gameElements[id][i].y = canvas.height/2  - wizard.h*sizepixel;
@@ -652,30 +315,36 @@ function loadLevelId(level){
 					}
 				}
 
-				continue;
+			
+				break;
 			}
 				
-			//gameElements[id][i]=rotateElem(gameElements[id][i],id);
 			
 		}
 		map[id] = rotateMap(id);
 		console.log(map[id]);
 	}
-	
-	/*set anglee for footprints
-	gameElements[currentLevel].forEach(function(elem){
-		if( elem.type == "pegada" && elem.isnew){
-			elem.r = 0;//gameElements[currentLevel][gameElements[currentLevel].length-2].r;
-			elem.isnew = false;
-			console.log("pegada false");
-		}
-		
-	});*/
-	
+	//try fix bug
+	/*if(currentanim != null){
+		console.log(wizard.changed)
+		wizard.changed.push([currentanim,currentframe,x,y,flip]);
+	}
+		if(currentLevel!=-1)
+			for(var i=0; i<gameElements[currentLevel].length; i++)
+				gameElements[currentLevel][i].clear();
+	*/	
 	currentLevel = id;
 	
-	for(var i=0; i<gameElements[currentLevel].length; i++)
-		gameElements[currentLevel][i].print();
+	for(var i=0; i<gameElements[currentLevel].length; i++){
+		gelms = gameElements[currentLevel][i];
+		//elements as background of menu initial
+		if(gelms.type == "noprint")
+			continue;
+		//set changed
+		gelms.changed.push([gelms.currentanim,gelms.currentframe,gelms.x,gelms.y, gelms.flipv]);
+		//print objetcts
+		gelms.print();
+	}
 }
 
 

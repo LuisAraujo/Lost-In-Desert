@@ -15,7 +15,7 @@ statue = new GameObject( [statue_a01], p_statue, 290, 350, 32, 5, true, 5);
 statue.type = "estatua";
 
 statue.update= function(){
-	this.changed = [this.currentanim, this.currentframe, this.x, this.y, this.flipv];
+	this.changed = [[this.currentanim, this.currentframe, this.x, this.y, this.flipv]];
 	this.currentframe += 0.2;
 	if(this.currentframe > this.data[this.currentanim].length-1){
 		this.currentframe = 0;
@@ -82,7 +82,7 @@ statue2 = new GameObject( [statue_a02], p_statue2, 303, 200, 17, 9, false, 100);
 statue2.type = "estatua";
 
 statue2.update= function(){
-	this.changed = [this.currentanim, this.currentframe, this.x, this.y, this.flipv];
+	this.changed = [[this.currentanim, this.currentframe, this.x, this.y, this.flipv]];
 	this.currentframe += 0.2;
 	if(this.currentframe > this.data[this.currentanim].length-1){
 		this.currentframe = 0;
