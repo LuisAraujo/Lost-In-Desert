@@ -328,11 +328,11 @@ function loadLevelId(level){
 	/*if(currentanim != null){
 		console.log(wizard.changed)
 		wizard.changed.push([currentanim,currentframe,x,y,flip]);
-	}
+	}*/
 		if(currentLevel!=-1)
 			for(var i=0; i<gameElements[currentLevel].length; i++)
 				gameElements[currentLevel][i].clear();
-	*/	
+	
 	currentLevel = id;
 	
 	for(var i=0; i<gameElements[currentLevel].length; i++){

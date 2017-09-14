@@ -99,6 +99,7 @@ return door;
 
 gerate_door2 = function(x,y, flip, degrees){
 
+
 door02 = [ 
 [0,0,0,0,0,0,0,0,0,0,0,0,0],
 [0,0,0,0,0,0,0,0,0,0,0,0,0],
