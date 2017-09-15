@@ -44,12 +44,16 @@ Character.prototype.move = function (dir){
 	}
 	
 	if((dir == "right") || (dir == "upright") || (dir == "downright")){
-	    if( ( (this.x > canvas.width-150) && ( (this.y < 275) || (this.y > 295) ) ) || (this.y < 90) || (this.y > 468))
+	    // ( (this.x > canvas.width-150) && ( (this.y < 275) || (this.y > 295) ) ) 
+		if( (this.x > canvas.width-150) || (this.y < 90) || (this.y > 468))
 			return;
 	}
 	
 	if((dir == "down") || (dir == "downleft") || (dir == "downright")){
-	    if((this.y > canvas.height-160) && ( (this.x < 260) || (this.x > 327) )){
+	    if( ( (this.x < 267) || (this.x > 290) ) && (this.y > canvas.height-180)){
+			return;
+		}else if( (this.x > 260) && (this.x < 290) && (this.y > canvas.height-120) ){
+			loadLevel("down");
 			return;
 		}
 	}
@@ -92,7 +96,7 @@ Character.prototype.move = function (dir){
 	if( (left) || (right) || (up) || (down) ){
 		this.changed.push([oldanim, oldframe, oldx, oldy, oldflipv]);
 		this.isstop=false;
-		console.log("play")	
+		//console.log("play")	
 		this.currentframe += 0.2;
 	}
 		
@@ -121,6 +125,8 @@ Character.prototype.update = function(){
 				elens[i].changed.push([elens[i].currentanim,elens[i].currentframe,elens[i].x,elens[i].y,,elens[i].flipv]);
 				this.changed.push([this.currentanim, this.currentframe, this.x, this.y, this.flipv]);
 			}
+			
+			
 		//end if
 		}
 	//end for
@@ -164,7 +170,7 @@ Character.prototype.update = function(){
 		this.changed.push([this.currentanim, this.currentframe, this.x, this.y, this.flipv]);
 		this.currentframe = 0;
 		this.isstop = true;
-		console.log("stop")	
+		//console.log("stop")	
 	}
 
 	
